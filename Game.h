@@ -32,9 +32,12 @@ private:
 
     // money of shop
     float allMoney;
+    sf::Sprite cashSprite;
+    sf::Texture cashTexture;
 
     // equipment
-    sf::Sprite microWave;
+    sf::Sprite microWaveSprite;
+    sf::Texture microWaveTexure;
     sf::Sprite stove;
     sf::Sprite fryer;
     sf::Sprite juiceMachine;
@@ -85,6 +88,7 @@ public:
     void updateMousePosition();
 
     void renderItems();
+    void renderEquipment();
 
     sf::Sprite *checkMouseOnItem();
 

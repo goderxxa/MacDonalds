@@ -98,11 +98,9 @@ void Game::updateEvents() {
 
 void Game::updateOrder() {
 
-
     if(sf::Mouse::isButtonPressed(sf::Mouse::Left)  )
     {
         selItem = checkMouseOnItem();
-
         draggin = true;
     }
     if(draggin && selItem!= nullptr)
@@ -117,6 +115,8 @@ void Game::updateOrder() {
 void Game::renderFrame() {
     window->clear();
     window->draw(mouseText);
+    renderEquipment();
+
     renderItems();
 
     window->display();
@@ -130,18 +130,17 @@ const bool Game::running() const {
 }
 
 void Game::initObjects() {
-#define X 100
-#define Y 100
 
+    //setting objects
     this->juice.texture.loadFromFile(getPath() + "/png/orangeJuice.png");
     this->hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
     this->potato.texture.loadFromFile(getPath() + "/png/freePotato.png");
 
     juice.sprite.setTexture(juice.texture);
-
     hamburger.sprite.setTexture(hamburger.texture);
     potato.sprite.setTexture(potato.texture);
 
+    //setting by for loop
     sf::Vector2f itemPos(10, 50);
     float offset=0;
     for(auto i : vecItems)
@@ -150,6 +149,18 @@ void Game::initObjects() {
         offset += 110;
         i->sprite.setScale(0.4f, 0.4f);
     }
+
+    //setting equipment on screen
+    this->microWaveTexure.loadFromFile(getPath() + "/png/microwave.png");
+    this->microWaveSprite.setTexture(microWaveTexure);
+    this->microWaveSprite.setPosition(X-microWaveSprite.getLocalBounds().width,0);
+    this->microWaveTexure.setSmooth(true);
+
+    this->cashTexture.loadFromFile(getPath() + "/png/cash.png");
+    this->cashSprite.setTexture(cashTexture);
+    this->cashSprite.setScale(0.7f,0.7f);
+    this->cashSprite.setPosition(150,Y- cashSprite.getGlobalBounds().height);
+    this->cashTexture.setSmooth(true);
 
 }
 
@@ -164,6 +175,11 @@ void Game::renderItems() {
     {
         window->draw(i->sprite);
     }
+}
+
+void Game::renderEquipment() {
+    window->draw(microWaveSprite);
+    window->draw(cashSprite);
 }
 
 sf::Sprite* Game::checkMouseOnItem()
