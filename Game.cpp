@@ -5,10 +5,9 @@
 #include "Game.h"
 
 //videomode
-#define X 800
-#define Y 600
+#define X 1280
+#define Y 720
 #define GameName "myGame"
-
 
 //get absolute path function
 #ifdef _WIN32
@@ -94,13 +93,31 @@ void Game::processEvents() {
 void Game::updateEvents() {
     processEvents();
     updateMousePosition();
+    updateOrder();
+}
+
+void Game::updateOrder() {
+
+
+    if(sf::Mouse::isButtonPressed(sf::Mouse::Left)  )
+    {
+        selItem = checkMouseOnItem();
+
+        draggin = true;
+    }
+    if(draggin && selItem!= nullptr)
+    {
+        selItem->setPosition(sf::Vector2f (this->mousePosition));
+    }
+    if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+        draggin = false;
 }
 
 
-void Game::RenderFrame() {
+void Game::renderFrame() {
     window->clear();
-    window->draw(current);
     window->draw(mouseText);
+    renderItems();
 
     window->display();
 //    std::cout << sf::Mouse::getPosition(*window).x  << " " <<
@@ -116,10 +133,23 @@ void Game::initObjects() {
 #define X 100
 #define Y 100
 
-    this->current.setFillColor(sf::Color::Green);
-    this->current.setSize(sf::Vector2f(X,Y));
-    this->current.setPosition(100, 100);
-    this->current.setOrigin(sf::Vector2f(X/2, Y/2));
+    this->juice.texture.loadFromFile(getPath() + "/png/orangeJuice.png");
+    this->hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
+    this->potato.texture.loadFromFile(getPath() + "/png/freePotato.png");
+
+    juice.sprite.setTexture(juice.texture);
+
+    hamburger.sprite.setTexture(hamburger.texture);
+    potato.sprite.setTexture(potato.texture);
+
+    sf::Vector2f itemPos(10, 50);
+    float offset=0;
+    for(auto i : vecItems)
+    {
+        i->sprite.setPosition(itemPos.x, itemPos.y+offset);
+        offset += 110;
+        i->sprite.setScale(0.4f, 0.4f);
+    }
 
 }
 
@@ -129,4 +159,40 @@ void Game::updateMousePosition() {
 
 }
 
+void Game::renderItems() {
+    for(auto i : vecItems)
+    {
+        window->draw(i->sprite);
+    }
+}
 
+sf::Sprite* Game::checkMouseOnItem()
+{
+    for (const auto& i : vecItems)
+    {
+        if (i->sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            i->sprite.setOrigin(getLocalClickPosition(i->sprite, mousePosition));
+            return &i->sprite;
+        }
+
+    }
+    return nullptr;
+}
+
+sf::Vector2f Game::getLocalClickPosition(const sf::Sprite& sprite, const sf::Vector2i& mousePosition)
+{
+    // Получаем позицию мыши в локальных координатах объекта
+    sf::Vector2f localMousePos = sprite.getInverseTransform().transformPoint(static_cast<sf::Vector2f>(mousePosition));
+
+    // Получение локальных границ спрайта
+    sf::FloatRect bounds = sprite.getLocalBounds();
+
+    // Проверка, щелкнули ли на объекте
+    if (bounds.contains(localMousePos))
+    {
+        return localMousePos;
+    }
+    // Если щелчок мыши не на объекте, возвращаем пустой вектор
+    return sf::Vector2f(-1.0f, -1.0f);
+}

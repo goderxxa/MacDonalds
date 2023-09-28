@@ -8,7 +8,7 @@ int main()
     while (game.running())
     {
         game.updateEvents();
-        game.RenderFrame();
+        game.renderFrame();
 
     }
 
