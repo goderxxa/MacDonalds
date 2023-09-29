@@ -3,9 +3,30 @@
 //
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <ctime>
+#include <map>
 
 #ifndef UNTITLED_GAME_H
 #define UNTITLED_GAME_H
+
+#define RICH 10     // generate 5-10
+#define MID 5       // 3-6
+#define POOR 2      // 2
+#define POOREST 1    // 1
+
+struct Buttons
+{
+    bool isActive;
+    sf::Sprite sprite;
+    sf::Texture texture;
+};
+
+struct Equipment
+{
+    float power;
+    sf::Sprite sprite;
+    sf::Texture texture;
+};
 
 struct Item
 {
@@ -17,9 +38,11 @@ struct Item
 
 struct Client
 {
-
     sf::Sprite sprite;
     sf::Texture texture;
+    int category;
+    float patience;
+    std::vector<std::string> requests;
 };
 
 class Game {
@@ -30,31 +53,53 @@ private:
     void initVariables();
     void initObjects();
 
-    // money of shop
-    float allMoney;
-    sf::Sprite cashSprite;
+    //load image files
+    std::vector<sf::Texture> poorPersons;
+    std::vector<sf::Texture> richPersons;
+    std::vector<sf::Texture> midPersons;
+    std::vector<sf::Texture> poorestPersons;
+
+    sf::Texture microWaveTexture;
     sf::Texture cashTexture;
+    sf::Texture repeatButtonTexture;
+    sf::Texture nextButtonTexture;
+
+    // money of shop
+    float allMoney = 0;
+    sf::Sprite cashSprite;
 
     // equipment
     sf::Sprite microWaveSprite;
-    sf::Texture microWaveTexure;
     sf::Sprite stove;
     sf::Sprite fryer;
     sf::Sprite juiceMachine;
+    sf::Sprite bin;
 
     //mouse events
     bool draggin=false;
 
-    sf::Sprite* selItem;
+    sf::Sprite* selItem;    // if clicked reference
 
-    // objects
+    //other events buttons
+    sf::Sprite repeatButtonSprite;
+    sf::Sprite nextButtonSprite;
+
+    // objects graphical
     sf::Sprite microwave;
-    Item juice;
-    Item potato;
     Item hamburger;
+    Item cheseburger;
+    Item bigmak;
+    Item villagePotato;
+    Item potato;
+    Item souse;
+    Item juice;
+    Item coffee;
 
-    std::vector<Item*> vecItems = {&juice, &hamburger, &potato};
+    std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato,
+                                   &potato, &souse, &juice, &coffee };
 
+    // vector of Clients, checks, cash
+    std::vector<Client> clients;
 
     //mouse position
     sf::Vector2i mousePosition;
@@ -63,32 +108,30 @@ private:
     sf::Text mouseText ;
     sf::Font font;
 
-
     // variables
     sf::RenderWindow* window;
     sf::Event ev;
     sf::VideoMode videoMode;
 
-
 public:
     // constructors destructors
     Game ();
-
     ~Game ();
-
 
     // functions
 
     std::string getPath();
     void processEvents();
-    void updateEvents();
-    void renderFrame();
-    void updateOrder();
 
+    void updateEvents();
+    void updateOrder();
     void updateMousePosition();
 
+    void renderFrame();
     void renderItems();
     void renderEquipment();
+    void renderClient();
+    void renderOrder();
 
     sf::Sprite *checkMouseOnItem();
 
@@ -98,7 +141,13 @@ public:
     // getting coordinates inside object
     sf::Vector2f getLocalClickPosition(const sf::Sprite& sprite, const sf::Vector2i& mousePosition);
 
+    //generating new client
+    void genNewClient();
 
+    //client tell his order
+    void tellOrder(Client& client );
+
+    void renderOrder(Client &client);
 };
 
 

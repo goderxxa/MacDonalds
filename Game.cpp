@@ -58,6 +58,9 @@ void Game::initVariables() {
     this->font.loadFromFile(getPath() + "arial.ttf");
     this->mouseText.setFillColor(sf::Color::Red);
     this->mouseText.setFont(this->font);
+
+    //load files
+
 }
 
 void Game::initWindow() {
@@ -96,6 +99,7 @@ void Game::updateEvents() {
     updateOrder();
 }
 
+
 void Game::updateOrder() {
 
     if(sf::Mouse::isButtonPressed(sf::Mouse::Left)  )
@@ -132,35 +136,54 @@ const bool Game::running() const {
 void Game::initObjects() {
 
     //setting objects
-    this->juice.texture.loadFromFile(getPath() + "/png/orangeJuice.png");
-    this->hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
-    this->potato.texture.loadFromFile(getPath() + "/png/freePotato.png");
 
-    juice.sprite.setTexture(juice.texture);
+    hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
+    cheseburger.texture.loadFromFile(getPath() + "/png/cheseburger.png");
+    bigmak.texture.loadFromFile(getPath() + "/png/bigmak.png");
+    villagePotato.texture.loadFromFile(getPath() + "/png/villagepotato.png");
+    potato.texture.loadFromFile(getPath() + "/png/freePotato.png");
+    souse.texture.loadFromFile(getPath() + "/png/chesesouse.png");
+    juice.texture.loadFromFile(getPath() + "/png/orangeJuice.png");
+    coffee.texture.loadFromFile(getPath() + "/png/coffee.png");
+
     hamburger.sprite.setTexture(hamburger.texture);
+    cheseburger.sprite.setTexture(cheseburger.texture);
+    bigmak.sprite.setTexture(bigmak.texture);
+    villagePotato.sprite.setTexture(villagePotato.texture);
     potato.sprite.setTexture(potato.texture);
+    souse.sprite.setTexture(souse.texture);
+    juice.sprite.setTexture(juice.texture);
+    coffee.sprite.setTexture(coffee.texture);
 
     //setting by for loop
-    sf::Vector2f itemPos(10, 50);
+    sf::Vector2f itemPos(10, 10);
     float offset=0;
     for(auto i : vecItems)
     {
         i->sprite.setPosition(itemPos.x, itemPos.y+offset);
-        offset += 110;
-        i->sprite.setScale(0.4f, 0.4f);
+        offset += 90;
+        i->sprite.setScale(0.3f, 0.3f);
+        i->texture.setSmooth(true);
     }
 
     //setting equipment on screen
-    this->microWaveTexure.loadFromFile(getPath() + "/png/microwave.png");
-    this->microWaveSprite.setTexture(microWaveTexure);
+    this->microWaveTexture.loadFromFile(getPath() + "/png/microwave.png");
+    this->microWaveSprite.setTexture(microWaveTexture);
     this->microWaveSprite.setPosition(X-microWaveSprite.getLocalBounds().width,0);
-    this->microWaveTexure.setSmooth(true);
+    this->microWaveTexture.setSmooth(true);
+
+    this->microWaveTexture.loadFromFile(getPath() + "/png/microwave.png");
+    this->microWaveSprite.setTexture(microWaveTexture);
+    this->microWaveSprite.setPosition(X-microWaveSprite.getLocalBounds().width,0);
+    this->microWaveTexture.setSmooth(true);
 
     this->cashTexture.loadFromFile(getPath() + "/png/cash.png");
     this->cashSprite.setTexture(cashTexture);
     this->cashSprite.setScale(0.7f,0.7f);
     this->cashSprite.setPosition(150,Y- cashSprite.getGlobalBounds().height);
     this->cashTexture.setSmooth(true);
+
+
 
 }
 
@@ -211,4 +234,66 @@ sf::Vector2f Game::getLocalClickPosition(const sf::Sprite& sprite, const sf::Vec
     }
     // Если щелчок мыши не на объекте, возвращаем пустой вектор
     return sf::Vector2f(-1.0f, -1.0f);
+}
+
+void Game::genNewClient()
+{
+    Client client;
+    srand(time(0));
+    client.category = rand() % RICH;
+    if(client.category < RICH && client.category > MID)
+    {
+        client.category = MID;
+        client.texture.loadFromFile("persons/mid.png");
+    }
+    else if(client.category < MID && client.category > POOR)
+    {
+        client.category = POOR;
+        client.texture.loadFromFile("persons/poor.png");
+    }
+    else if(client.category == 1)
+    {
+        client.category = POOREST;
+        client.texture.loadFromFile("persons/poorest.png");
+    }
+    else if(client.category == 10)
+    {
+        client.category = RICH;
+        client.texture.loadFromFile("persons/rich.png");
+    }
+    if(client.category == RICH)
+    {
+        srand(time(0));
+        int n = std::rand() % 6 + 5;
+        for(int i=0;i<n;++i)
+        {
+
+        }
+    }
+    clients.push_back(client);
+
+
+
+
+}
+
+void Game::renderClient() {
+    if(!clients.empty())
+    {
+        for(auto i : clients)
+        {
+            window->draw(i.sprite);
+        }
+    }
+}
+void Game::renderOrder(Client& client)
+{
+    sf::Text text;
+    sf::Font font;
+    font.loadFromFile("arial.ttf");
+    for(auto request : client.requests)
+    {
+        text.setString(request);
+        window->draw(text);
+    }
 }
