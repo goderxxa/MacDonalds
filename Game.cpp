@@ -135,6 +135,15 @@ const bool Game::running() const {
 
 void Game::initObjects() {
 
+    //load images
+    backGround.texture.loadFromFile(getPath() + "/png/gamebackground.png");
+    backGround.sprite.setTexture(backGround.texture);
+    backGround.sprite.setScale(0.668,0.668);
+
+    cafeBackground.texture.loadFromFile(getPath() + "/png/gameback.png");
+    cafeBackground.sprite.setTexture(cafeBackground.texture);
+    cafeBackground.sprite.setScale(0.668,0.668);
+
     //setting objects
 
     hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
@@ -157,33 +166,32 @@ void Game::initObjects() {
 
     //setting by for loop
     sf::Vector2f itemPos(10, 10);
-    float offset=0;
+    float offset=7;
     for(auto i : vecItems)
     {
-        i->sprite.setPosition(itemPos.x, itemPos.y+offset);
-        offset += 90;
+        i->sprite.setPosition(itemPos.x+offset, itemPos.y);
+        offset += 94;
         i->sprite.setScale(0.3f, 0.3f);
         i->texture.setSmooth(true);
     }
 
     //setting equipment on screen
-    this->microWaveTexture.loadFromFile(getPath() + "/png/microwave.png");
-    this->microWaveSprite.setTexture(microWaveTexture);
-    this->microWaveSprite.setPosition(X-microWaveSprite.getLocalBounds().width,0);
-    this->microWaveTexture.setSmooth(true);
+    microWave.texture.loadFromFile(getPath() + "/png/microwave.png");
+    microWave.sprite.setTexture(microWave.texture);
+    microWave.sprite.setPosition(X-microWave.sprite.getLocalBounds().width,126);
+    microWave.texture.setSmooth(true);
 
-    this->microWaveTexture.loadFromFile(getPath() + "/png/microwave.png");
-    this->microWaveSprite.setTexture(microWaveTexture);
-    this->microWaveSprite.setPosition(X-microWaveSprite.getLocalBounds().width,0);
-    this->microWaveTexture.setSmooth(true);
+    cash.texture.loadFromFile(getPath() + "/png/cash.png");
+    cash.sprite.setTexture(cash.texture);
+    cash.sprite.setScale(0.7f,0.7f);
+    cash.sprite.setPosition(10,Y- cash.sprite.getGlobalBounds().height -10);
+    cash.texture.setSmooth(true);
 
-    this->cashTexture.loadFromFile(getPath() + "/png/cash.png");
-    this->cashSprite.setTexture(cashTexture);
-    this->cashSprite.setScale(0.7f,0.7f);
-    this->cashSprite.setPosition(150,Y- cashSprite.getGlobalBounds().height);
-    this->cashTexture.setSmooth(true);
-
-
+    juiceMachine.texture.loadFromFile(getPath() + "/png/coffeeMachine.png");
+    juiceMachine.sprite.setTexture(juiceMachine.texture);
+    juiceMachine.sprite.setScale(0.3f,0.3f);
+    juiceMachine.sprite.setPosition(X-juiceMachine.sprite.getGlobalBounds().width *2 +25 ,Y - juiceMachine.sprite.getGlobalBounds().height - 30);
+    juiceMachine.texture.setSmooth(true);
 
 }
 
@@ -201,8 +209,13 @@ void Game::renderItems() {
 }
 
 void Game::renderEquipment() {
-    window->draw(microWaveSprite);
-    window->draw(cashSprite);
+    window->draw(cafeBackground.sprite);
+    window->draw(backGround.sprite);
+    window->draw(microWave.sprite);
+    window->draw(juiceMachine.sprite);
+    window->draw(cash.sprite);
+
+
 }
 
 sf::Sprite* Game::checkMouseOnItem()
@@ -271,9 +284,6 @@ void Game::genNewClient()
         }
     }
     clients.push_back(client);
-
-
-
 
 }
 

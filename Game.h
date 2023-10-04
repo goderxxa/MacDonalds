@@ -14,30 +14,31 @@
 #define POOR 2      // 2
 #define POOREST 1    // 1
 
-struct Buttons
-{
+struct Image    {
+    sf::Sprite sprite;
+    sf::Texture texture;
+};
+
+struct Button   {
     bool isActive;
     sf::Sprite sprite;
     sf::Texture texture;
 };
 
-struct Equipment
-{
+struct Equipment    {
     float power;
     sf::Sprite sprite;
     sf::Texture texture;
 };
 
-struct Item
-{
+struct Item     {
     float price;
     float cookingTime;
     sf::Sprite sprite;
     sf::Texture texture;
 };
 
-struct Client
-{
+struct Client   {
     sf::Sprite sprite;
     sf::Texture texture;
     int category;
@@ -47,6 +48,10 @@ struct Client
 
 class Game {
 private:
+
+    //load background images
+    Image cafeBackground;
+    Image backGround;
 
     // private functions
     void initWindow();
@@ -59,21 +64,16 @@ private:
     std::vector<sf::Texture> midPersons;
     std::vector<sf::Texture> poorestPersons;
 
-    sf::Texture microWaveTexture;
-    sf::Texture cashTexture;
-    sf::Texture repeatButtonTexture;
-    sf::Texture nextButtonTexture;
-
     // money of shop
     float allMoney = 0;
-    sf::Sprite cashSprite;
 
     // equipment
-    sf::Sprite microWaveSprite;
-    sf::Sprite stove;
-    sf::Sprite fryer;
-    sf::Sprite juiceMachine;
-    sf::Sprite bin;
+    Equipment microWave;
+    Equipment stove;
+    Equipment fryer;
+    Equipment juiceMachine;
+    Equipment bin;
+    Equipment cash;
 
     //mouse events
     bool draggin=false;
@@ -81,8 +81,11 @@ private:
     sf::Sprite* selItem;    // if clicked reference
 
     //other events buttons
-    sf::Sprite repeatButtonSprite;
-    sf::Sprite nextButtonSprite;
+    Button repeatButtonSprite;
+    Button nextButtonSprite;
+
+    Button juiceCoffee;
+    Button pour;
 
     // objects graphical
     sf::Sprite microwave;
