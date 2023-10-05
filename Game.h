@@ -77,8 +77,9 @@ private:
 
     //mouse events
     bool draggin=false;
+    bool itemTaken = false;
 
-    sf::Sprite* selItem;    // if clicked reference
+    Item* selItem;    // if clicked reference
 
     //other events buttons
     Button repeatButtonSprite;
@@ -107,6 +108,10 @@ private:
     //mouse position
     sf::Vector2i mousePosition;
 
+    //active objects position
+    sf::Vector2f originalObjPos;
+    sf::Vector2f origanalOriginPos;
+
     // text for mouse pos display
     sf::Text mouseText ;
     sf::Font font;
@@ -115,6 +120,11 @@ private:
     sf::RenderWindow* window;
     sf::Event ev;
     sf::VideoMode videoMode;
+
+    //for return animation
+    sf::Clock returnAnimationClock;
+    sf::Time returnAnimationDuration = sf::seconds(5.0);
+    bool isReturnAnimation = false;
 
 public:
     // constructors destructors
@@ -129,6 +139,10 @@ public:
     void updateEvents();
     void updateOrder();
     void updateMousePosition();
+    void returnAnimation();
+
+    // take information about item
+    void processSelfitem();
 
     void renderFrame();
     void renderItems();
@@ -136,7 +150,7 @@ public:
     void renderClient();
     void renderOrder();
 
-    sf::Sprite *checkMouseOnItem();
+    Item *checkMouseOnItem();
 
     // accessors
     const bool running() const;
