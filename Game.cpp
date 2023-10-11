@@ -14,8 +14,8 @@
 #ifdef _WIN32
 #include <Windows.h>
 #elif defined(__linux__)
-    #include <climits>
-    #include <unistd.h>
+#include <climits>
+#include <unistd.h>
 #elif defined(__APPLE__)
 #include <mach-o/dyld.h>
 #endif
@@ -99,7 +99,6 @@ void Game::updateEvents() {
 
 void Game::updateOrder()
 {
-
     if(!isReturnAnimation)
     {
         if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left && !draggin && isMouseInputAllowed)
@@ -107,8 +106,9 @@ void Game::updateOrder()
             isMouseInputAllowed = false; // Блокируем дополнительные клики
             clickClock.restart();
 
-            powerEquipment();
             selItem = checkMouseOnItem();
+            selfEquipment = checkMouseOnEquipment();
+            powerEquipment();
 
             if(selItem!= nullptr){
                 originalObjPos = selItem->sprite.getPosition();
@@ -117,6 +117,7 @@ void Game::updateOrder()
                 draggin = true;
             }
         }
+
         if (!isMouseInputAllowed) {
             // Если мышь была нажата, проверяем задержку
             sf::Time elapsedTime = clickClock.getElapsedTime();
@@ -139,10 +140,6 @@ void Game::updateOrder()
                 returnAnimationClock.restart();
             }
         }
-
-
-
-
     }
     if(selItem!= nullptr )
     {
@@ -150,6 +147,17 @@ void Game::updateOrder()
         {
             isEquipment();
         }
+    }
+}
+void Game::powerEquipment()
+{
+    if(selfEquipment!= nullptr)
+    {
+        if(selfEquipment->text.getGlobalBounds().contains(sf::Vector2f (mousePosition)))
+            if(selfEquipment->text.getString() == "off")
+                selfEquipment->text.setString("on");
+            else
+                selfEquipment->text.setString("off");
     }
 }
 
@@ -173,17 +181,6 @@ void Game::isEquipment()
     {
         isReturnAnimation = true;
         returnAnimation();
-    }
-}
-
-void Game::powerEquipment() {
-    if(checkMouseOnEquipment()!= nullptr)
-    {
-        selfEquipment = checkMouseOnEquipment();
-        if(selfEquipment->text.getString() == "Off")
-            selfEquipment->text.setString("On");
-        else
-            selfEquipment->text.setString("Off");
     }
 }
 
@@ -290,8 +287,9 @@ void Game::initObjects() {
     microWave.sprite.setPosition(X-microWave.sprite.getLocalBounds().width,126);
     microWave.texture.setSmooth(true);
     microWave.text.setFont(font);
-    microWave.text.setPosition(microWave.sprite.getPosition().x + 180, microWave.sprite.getPosition().y+7);
-    microWave.text.setString("Off");
+    microWave.text.setPosition(microWave.sprite.getPosition().x+180, microWave.sprite.getPosition().y+9);
+    microWave.text.setString("off");
+
 
     cash.texture.loadFromFile(getPath() + "/png/cash.png");
     cash.sprite.setTexture(cash.texture);
@@ -307,7 +305,7 @@ void Game::initObjects() {
 
 }
 
-void Game::updateMousePosition() 
+void Game::updateMousePosition()
 {
     this->mousePosition= sf::Mouse::getPosition(*this->window);
     this->mouseText.setString(std::to_string(sf::Mouse::getPosition(*this->window).x) + " " + std::to_string(sf::Mouse::getPosition(*this->window).y) );
@@ -324,9 +322,9 @@ void Game::renderEquipment() {
     window->draw(cafeBackground.sprite);
     window->draw(backGround.sprite);
     window->draw(microWave.sprite);
+    window->draw(microWave.text);
     window->draw(juiceMachine.sprite);
     window->draw(cash.sprite);
-    window->draw(microWave.text);
 }
 
 Item* Game::checkMouseOnItem()
@@ -352,6 +350,7 @@ Equipment* Game::checkMouseOnEquipment()
     }
     return nullptr;
 }
+
 
 sf::Vector2f Game::getLocalClickPosition(const sf::Sprite& sprite, const sf::Vector2i& mousePosition)
 {
