@@ -77,18 +77,14 @@ private:
     Equipment cash;
 
     //mouse events
-    bool isMouseInputAllowed = true;
-
-    sf::Clock clickClock;
-    sf::Time clickDelay = sf::milliseconds(50);
-
-    bool draggin=false;
+    bool draggin = false;
     bool itemTaken = false;
+    bool isMouseInputAllowed = true;
+    sf::Clock clickClock;
+    sf::Time clickDelay = sf::milliseconds(150);
 
-    // equipment variables
     Equipment* selfEquipment;
     Item* selItem;    // if clicked reference
-    sf::Text microWavePower;
 
     //other events buttons
     Button repeatButtonSprite;
@@ -153,12 +149,7 @@ public:
     void updateMousePosition();
     void returnAnimation();
 
-    // equipment processes
     void isEquipment();
-    Equipment* checkMouseOnEquipment();
-    void powerEquipment();
-
-
 
     void interpolatePosition();
 
@@ -172,6 +163,9 @@ public:
     void renderOrder();
 
     Item *checkMouseOnItem();
+    Equipment* checkMouseOnEquipment();
+
+    void powerEquipment();
 
     // accessors
     const bool running() const;
