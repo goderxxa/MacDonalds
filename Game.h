@@ -79,6 +79,7 @@ private:
     bool draggin=false;
     bool itemTaken = false;
 
+    Equipment* selfEquipment;
     Item* selItem;    // if clicked reference
 
     //other events buttons
@@ -101,6 +102,8 @@ private:
 
     std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato,
                                    &potato, &souse, &juice, &coffee };
+
+    std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine};
 
     // vector of Clients, checks, cash
     std::vector<Client> clients;
@@ -142,10 +145,12 @@ public:
     void updateMousePosition();
     void returnAnimation();
 
+    void isEquipment();
+
     void interpolatePosition();
 
     // take information about item
-    void processSelfitem();
+    Equipment* processSelfitem();
 
     void renderFrame();
     void renderItems();

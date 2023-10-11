@@ -121,27 +121,38 @@ void Game::updateOrder()
             if(selItem!= nullptr )
             {
                 selItem->sprite.setScale(0.3,0.3);
-                draggin = false;
                 mouseClickPos = selItem->sprite.getPosition();
+                draggin = false;
                 returnAnimationClock.restart();
             }
         }
     }
     if(selItem!= nullptr )
+    {
         if(!draggin)
         {
-            processSelfitem();
+            isEquipment();
         }
-
+    }
 }
 
-void Game::processSelfitem()
+Equipment* Game::processSelfitem()
 {
-    if(microWave.sprite.getGlobalBounds().contains(mouseClickPos))
+    for(auto equipment : vecEquipment)
     {
-         selItem->sprite.setPosition(microWave.sprite.getPosition() );
+        if(equipment->sprite.getGlobalBounds().contains(mouseClickPos))
+            return equipment;
     }
-    else if(selItem->price >= souse.price && !microWave.sprite.getGlobalBounds().contains(selItem->sprite.getPosition()) )
+    return nullptr;
+}
+
+void Game::isEquipment()
+{
+    if(processSelfitem()!=nullptr)
+    {
+        selItem->sprite.setPosition(processSelfitem()->sprite.getPosition() );
+    }
+    else
     {
         isReturnAnimation = true;
         returnAnimation();
@@ -158,11 +169,9 @@ void Game::returnAnimation()
     }
     sf::Vector2f interpolatedPosition = selItem->sprite.getPosition() + (originalObjPos - selItem->sprite.getPosition()) * progress;
     selItem->sprite.setPosition(interpolatedPosition);
-
 //    std::cout << progress <<std::endl;
 //    std::cout << mouseClickPos.x << " " <<mouseClickPos.y <<std::endl;
-    std::cout << isReturnAnimation <<std::endl;
-
+//    std::cout << isReturnAnimation <<std::endl;
 
 }
 
