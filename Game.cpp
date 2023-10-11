@@ -45,7 +45,6 @@ std::string Game::getPath() {
     if (lastSlashPos != std::string::npos) {
         executablePath = executablePath.substr(0, lastSlashPos+1);
     }
-
     return executablePath;
 }
 
@@ -59,9 +58,7 @@ void Game::initVariables() {
     this->font.loadFromFile(getPath() + "arial.ttf");
     this->mouseText.setFillColor(sf::Color::Red);
     this->mouseText.setFont(this->font);
-
     //load files
-
 }
 
 void Game::initWindow() {
@@ -95,67 +92,76 @@ void Game::processEvents() {
 }
 
 void Game::updateEvents() {
-    processEvents();
     updateMousePosition();
     updateOrder();
+    processEvents();
 }
 
-void Game::updateOrder() {
-
-    if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left )
+void Game::updateOrder()
+{
+    if(!isReturnAnimation)
     {
-        selItem = checkMouseOnItem();
-        draggin = true;
-        if(selItem!= nullptr){
-            originalObjPos = selItem->sprite.getPosition();
-            std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
-            selItem->sprite.setScale(0.4,0.4);          //change size of dragging item
-        }
-
-    }
-    else if(draggin && selItem != nullptr)
-    {
-        selItem->sprite.setPosition(sf::Vector2f (this->mousePosition));
-    }
-    if(ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Right)
-    {
-        draggin = false;
-        if(selItem!= nullptr)
+        if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left && !draggin )
         {
-            selItem->sprite.setScale(0.3,0.3);
+            selItem = checkMouseOnItem();
+
+            if(selItem!= nullptr){
+                originalObjPos = selItem->sprite.getPosition();
+                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
+                selItem->sprite.setScale(0.4,0.4);          //change size of dragging item
+                draggin = true;
+            }
+        }
+        if(draggin )
+        {
+            selItem->sprite.setPosition(sf::Vector2f (this->mousePosition));
+        }
+        if(ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Right)
+        {
+            if(selItem!= nullptr )
+            {
+                selItem->sprite.setScale(0.3,0.3);
+                draggin = false;
+                mouseClickPos = selItem->sprite.getPosition();
+                returnAnimationClock.restart();
+            }
+        }
+    }
+    if(selItem!= nullptr )
+        if(!draggin)
+        {
             processSelfitem();
         }
+
+}
+
+void Game::processSelfitem()
+{
+    if(microWave.sprite.getGlobalBounds().contains(mouseClickPos))
+    {
+         selItem->sprite.setPosition(microWave.sprite.getPosition() );
+    }
+    else if(selItem->price >= souse.price && !microWave.sprite.getGlobalBounds().contains(selItem->sprite.getPosition()) )
+    {
+        isReturnAnimation = true;
+        returnAnimation();
     }
 }
 
 void Game::returnAnimation()
 {
     float progress = returnAnimationClock.getElapsedTime().asSeconds() / returnAnimationDuration.asSeconds();
-
-
-        if (progress > 1.0) {
-            progress = 1.0;
-            isReturnAnimation = false;
-        }
-        sf::Vector2f interpolatedPosition =
-                selItem->sprite.getPosition() + (originalObjPos - selItem->sprite.getPosition()) * progress;
-        selItem->sprite.setPosition(interpolatedPosition);
-
-
-}
-
-void Game::processSelfitem()
-{
-    if(selItem!= nullptr)
+    if(progress > 0.3)
     {
-        if(selItem->price >= hamburger.price && microWave.sprite.getGlobalBounds().contains(selItem->sprite.getPosition()))
-            selItem->sprite.setPosition(microWave.sprite.getPosition() );
-        else if(selItem->price >= hamburger.price && !microWave.sprite.getGlobalBounds().contains(selItem->sprite.getPosition()) )
-        {
-            isReturnAnimation = true;
-            returnAnimation();
-        }
+        progress = 1.0;
+        isReturnAnimation = false;
     }
+    sf::Vector2f interpolatedPosition = selItem->sprite.getPosition() + (originalObjPos - selItem->sprite.getPosition()) * progress;
+    selItem->sprite.setPosition(interpolatedPosition);
+
+//    std::cout << progress <<std::endl;
+//    std::cout << mouseClickPos.x << " " <<mouseClickPos.y <<std::endl;
+    std::cout << isReturnAnimation <<std::endl;
 
 
 }
@@ -168,8 +174,6 @@ void Game::renderFrame() {
     renderItems();
 
     window->display();
-//    std::cout << sf::Mouse::getPosition(*window).x  << " " <<
-//                 sf::Mouse::getPosition(*window).y <<  "\n";
 }
 
 const bool Game::running() const {
@@ -263,10 +267,10 @@ void Game::initObjects() {
 
 }
 
-void Game::updateMousePosition() {
+void Game::updateMousePosition() 
+{
     this->mousePosition= sf::Mouse::getPosition(*this->window);
     this->mouseText.setString(std::to_string(sf::Mouse::getPosition(*this->window).x) + " " + std::to_string(sf::Mouse::getPosition(*this->window).y) );
-
 }
 
 void Game::renderItems() {

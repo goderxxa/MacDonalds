@@ -107,6 +107,7 @@ private:
 
     //mouse position
     sf::Vector2i mousePosition;
+    sf::Vector2f mouseClickPos;
 
     //active objects position
     sf::Vector2f originalObjPos;
@@ -123,7 +124,7 @@ private:
 
     //for return animation
     sf::Clock returnAnimationClock;
-    sf::Time returnAnimationDuration = sf::seconds(5.0);
+    sf::Time returnAnimationDuration = sf::seconds(2.0);
     bool isReturnAnimation = false;
 
 public:
@@ -140,6 +141,8 @@ public:
     void updateOrder();
     void updateMousePosition();
     void returnAnimation();
+
+    void interpolatePosition();
 
     // take information about item
     void processSelfitem();
@@ -165,6 +168,8 @@ public:
     void tellOrder(Client& client );
 
     void renderOrder(Client &client);
+
+
 };
 
 
