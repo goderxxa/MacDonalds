@@ -99,10 +99,15 @@ void Game::updateEvents() {
 
 void Game::updateOrder()
 {
+
     if(!isReturnAnimation)
     {
-        if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left && !draggin )
+        if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left && !draggin && isMouseInputAllowed)
         {
+            isMouseInputAllowed = false; // Блокируем дополнительные клики
+            clickClock.restart();
+
+            powerEquipment();
             selItem = checkMouseOnItem();
 
             if(selItem!= nullptr){
@@ -112,6 +117,14 @@ void Game::updateOrder()
                 draggin = true;
             }
         }
+        if (!isMouseInputAllowed) {
+            // Если мышь была нажата, проверяем задержку
+            sf::Time elapsedTime = clickClock.getElapsedTime();
+            if (elapsedTime >= clickDelay) {
+                isMouseInputAllowed = true; // Разрешаем обработку следующего клика
+            }
+        }
+
         if(draggin )
         {
             selItem->sprite.setPosition(sf::Vector2f (this->mousePosition));
@@ -126,6 +139,10 @@ void Game::updateOrder()
                 returnAnimationClock.restart();
             }
         }
+
+
+
+
     }
     if(selItem!= nullptr )
     {
@@ -156,6 +173,17 @@ void Game::isEquipment()
     {
         isReturnAnimation = true;
         returnAnimation();
+    }
+}
+
+void Game::powerEquipment() {
+    if(checkMouseOnEquipment()!= nullptr)
+    {
+        selfEquipment = checkMouseOnEquipment();
+        if(selfEquipment->text.getString() == "Off")
+            selfEquipment->text.setString("On");
+        else
+            selfEquipment->text.setString("Off");
     }
 }
 
@@ -261,6 +289,9 @@ void Game::initObjects() {
     microWave.sprite.setTexture(microWave.texture);
     microWave.sprite.setPosition(X-microWave.sprite.getLocalBounds().width,126);
     microWave.texture.setSmooth(true);
+    microWave.text.setFont(font);
+    microWave.text.setPosition(microWave.sprite.getPosition().x + 180, microWave.sprite.getPosition().y+7);
+    microWave.text.setString("Off");
 
     cash.texture.loadFromFile(getPath() + "/png/cash.png");
     cash.sprite.setTexture(cash.texture);
@@ -295,11 +326,24 @@ void Game::renderEquipment() {
     window->draw(microWave.sprite);
     window->draw(juiceMachine.sprite);
     window->draw(cash.sprite);
+    window->draw(microWave.text);
 }
 
 Item* Game::checkMouseOnItem()
 {
     for (const auto& i : vecItems)
+    {
+        if (i->sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            return i;
+        }
+    }
+    return nullptr;
+}
+
+Equipment* Game::checkMouseOnEquipment()
+{
+    for (const auto& i : vecEquipment)
     {
         if (i->sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
         {

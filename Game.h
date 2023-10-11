@@ -29,6 +29,7 @@ struct Equipment    {
     float power;
     sf::Sprite sprite;
     sf::Texture texture;
+    sf::Text text;
 };
 
 struct Item     {
@@ -76,11 +77,18 @@ private:
     Equipment cash;
 
     //mouse events
+    bool isMouseInputAllowed = true;
+
+    sf::Clock clickClock;
+    sf::Time clickDelay = sf::milliseconds(50);
+
     bool draggin=false;
     bool itemTaken = false;
 
+    // equipment variables
     Equipment* selfEquipment;
     Item* selItem;    // if clicked reference
+    sf::Text microWavePower;
 
     //other events buttons
     Button repeatButtonSprite;
@@ -145,7 +153,12 @@ public:
     void updateMousePosition();
     void returnAnimation();
 
+    // equipment processes
     void isEquipment();
+    Equipment* checkMouseOnEquipment();
+    void powerEquipment();
+
+
 
     void interpolatePosition();
 
