@@ -37,6 +37,7 @@ struct Item     {
     float cookingTime;
     sf::Sprite sprite;
     sf::Texture texture;
+    sf::Text text;
 };
 
 struct Client   {
@@ -85,6 +86,7 @@ private:
 
     Equipment* selfEquipment;
     Item* selItem;    // if clicked reference
+    Item copyItem;
 
     //other events buttons
     Button repeatButtonSprite;
@@ -108,6 +110,9 @@ private:
                                    &potato, &souse, &juice, &coffee };
 
     std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine};
+    std::vector<Item> microWaveProducts;
+    int microWaveProdPos;
+
 
     // vector of Clients, checks, cash
     std::vector<Client> clients;
@@ -159,13 +164,17 @@ public:
     void renderFrame();
     void renderItems();
     void renderEquipment();
+
+    void renderCookingItems();
+
     void renderClient();
     void renderOrder();
 
-    Item *checkMouseOnItem();
+    Item* checkMouseOnItem();
     Equipment* checkMouseOnEquipment();
 
     void powerEquipment();
+    void cookItems();
 
     // accessors
     const bool running() const;
