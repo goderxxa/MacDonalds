@@ -111,9 +111,10 @@ void Game::updateOrder()
             powerEquipment();
 
             if(selItem!= nullptr){
-                originalObjPos = selItem->sprite.getPosition();
+                copyItem = *selItem;
+                originalObjPos = copyItem.sprite.getPosition();
                 std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
-                selItem->sprite.setScale(0.4,0.4);          //change size of dragging item
+                copyItem.sprite.setScale(0.4,0.4);          //change size of dragging item
                 draggin = true;
             }
         }
@@ -128,14 +129,14 @@ void Game::updateOrder()
 
         if(draggin )
         {
-            selItem->sprite.setPosition(sf::Vector2f (this->mousePosition));
+            copyItem.sprite.setPosition(sf::Vector2f (this->mousePosition));
         }
         if(ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Right)
         {
             if(selItem!= nullptr )
             {
-                selItem->sprite.setScale(0.3,0.3);
-                mouseClickPos = selItem->sprite.getPosition();
+                copyItem.sprite.setScale(0.3,0.3);
+                mouseClickPos = copyItem.sprite.getPosition();
                 draggin = false;
                 returnAnimationClock.restart();
             }
@@ -147,6 +148,10 @@ void Game::updateOrder()
         {
             isEquipment();
         }
+    }
+    if(microWave.text.getString()=="on")
+    {
+        cookItems();
     }
 }
 void Game::powerEquipment()
@@ -165,17 +170,45 @@ Equipment* Game::processSelfitem()
 {
     for(auto equipment : vecEquipment)
     {
-        if(equipment->sprite.getGlobalBounds().contains(mouseClickPos))
+        if(equipment->sprite.getGlobalBounds().contains(mouseClickPos) )
             return equipment;
     }
     return nullptr;
 }
 
+void Game::cookItems() {
+    if(!microWaveProducts.empty())
+    {
+        for(auto &item : microWaveProducts)
+        {
+            item.cookingTime -= 0.02;
+            if(int(item.cookingTime) % 1 == 0  )
+            {
+                item.text.setFont(font);
+                item.text.setPosition(item.sprite.getPosition().x-10, item.sprite.getPosition().y + 80);
+                item.text.setString(std::to_string(int(item.cookingTime)));
+            }
+            if(item.cookingTime < 0 )
+                item.text.setFillColor(sf::Color::Red);
+        }
+    }
+}
+
 void Game::isEquipment()
 {
-    if(processSelfitem()!=nullptr)
+    if(processSelfitem()!=nullptr && microWaveProducts.size() < 3)
     {
-        selItem->sprite.setPosition(processSelfitem()->sprite.getPosition() );
+        microWaveProducts.push_back(copyItem);
+        if(microWaveProducts.empty())
+        {
+            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100, processSelfitem()->sprite.getPosition().y+130 );
+        }
+        else
+        {
+            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWaveProdPos, processSelfitem()->sprite.getPosition().y+130 );
+            microWaveProdPos+=80;
+        }
+        selItem = nullptr;
     }
     else
     {
@@ -186,17 +219,16 @@ void Game::isEquipment()
 
 void Game::returnAnimation()
 {
+    copyItem.sprite.setColor(sf::Color(255,255,255,100));
     float progress = returnAnimationClock.getElapsedTime().asSeconds() / returnAnimationDuration.asSeconds();
     if(progress > 0.3)
     {
         progress = 1.0;
         isReturnAnimation = false;
+        copyItem.sprite.setColor(sf::Color(255,255,255,255));
     }
-    sf::Vector2f interpolatedPosition = selItem->sprite.getPosition() + (originalObjPos - selItem->sprite.getPosition()) * progress;
-    selItem->sprite.setPosition(interpolatedPosition);
-//    std::cout << progress <<std::endl;
-//    std::cout << mouseClickPos.x << " " <<mouseClickPos.y <<std::endl;
-//    std::cout << isReturnAnimation <<std::endl;
+    sf::Vector2f interpolatedPosition = copyItem.sprite.getPosition() + (originalObjPos - copyItem.sprite.getPosition()) * progress;
+    copyItem.sprite.setPosition(interpolatedPosition);
 
 }
 
@@ -206,6 +238,7 @@ void Game::renderFrame() {
 
     renderEquipment();
     renderItems();
+    renderCookingItems();
 
     window->display();
 }
@@ -279,7 +312,9 @@ void Game::initObjects() {
         offset += 94;
         i->sprite.setScale(0.3f, 0.3f);
         i->texture.setSmooth(true);
+        i->text.setCharacterSize(16);
     }
+
 
     //setting equipment on screen
     microWave.texture.loadFromFile(getPath() + "/png/microwave.png");
@@ -316,6 +351,7 @@ void Game::renderItems() {
     {
         window->draw(i->sprite);
     }
+    window->draw(copyItem.sprite);
 }
 
 void Game::renderEquipment() {
@@ -407,6 +443,19 @@ void Game::renderClient() {
         }
     }
 }
+
+void Game::renderCookingItems() {
+    if(!microWaveProducts.empty())
+    {
+        for(auto i : microWaveProducts)
+        {
+            window->draw(i.sprite);
+            window->draw(i.text);
+        }
+    }
+}
+
+
 void Game::renderOrder(Client& client)
 {
     sf::Text text;
