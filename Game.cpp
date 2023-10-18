@@ -97,6 +97,13 @@ void Game::updateEvents() {
     processEvents();
 }
 
+
+void Game::moveItem() {
+    copyItem = *selItem;
+    copyItem.sprite.setPosition(mousePosition.x,mousePosition.y);
+
+}
+
 void Game::updateOrder()
 {
     if(!isReturnAnimation)
@@ -135,9 +142,9 @@ void Game::updateOrder()
         {
             if(selItem!= nullptr )
             {
+                draggin = false;
                 copyItem.sprite.setScale(0.3,0.3);
                 mouseClickPos = copyItem.sprite.getPosition();
-                draggin = false;
                 returnAnimationClock.restart();
             }
         }
@@ -149,9 +156,13 @@ void Game::updateOrder()
             isEquipment();
         }
     }
-    if(microWave.text.getString()=="on")
+    if(microWave.text.getString()=="on" )
     {
         cookItems();
+    }
+    if(juiceMachine.text.getString()=="on" )
+    {
+        cookCoffeeJuice();
     }
 }
 void Game::powerEquipment()
@@ -176,6 +187,13 @@ Equipment* Game::processSelfitem()
     return nullptr;
 }
 
+Packet* Game::processPacket()
+{
+    if(packet.sprite.getGlobalBounds().contains(mouseClickPos))
+        return &packet;
+    return nullptr;
+}
+
 void Game::cookItems() {
     if(!microWaveProducts.empty())
     {
@@ -194,27 +212,87 @@ void Game::cookItems() {
     }
 }
 
+void Game::cookCoffeeJuice() {
+    if (!coffeeJuiceProducts.empty()) {
+        for (auto &item: coffeeJuiceProducts) {
+            item.cookingTime -= 0.02;
+            if (int(item.cookingTime) % 1 == 0) {
+                item.text.setFont(font);
+                item.text.setPosition(item.sprite.getPosition().x - 10, item.sprite.getPosition().y + 80);
+                item.text.setString(std::to_string(int(item.cookingTime)));
+            }
+            if (item.cookingTime < 0)
+                item.text.setFillColor(sf::Color::Red);
+        }
+    }
+}
+
+
+// game logic
 void Game::isEquipment()
 {
-    if(processSelfitem()!=nullptr && microWaveProducts.size() < 3)
+    if(processSelfitem() == &microWave && microWaveProducts.size() < 3 && copyItem.type == 1 )
     {
-        microWaveProducts.push_back(copyItem);
         if(microWaveProducts.empty())
         {
             copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100, processSelfitem()->sprite.getPosition().y+130 );
         }
         else
         {
-            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWaveProdPos, processSelfitem()->sprite.getPosition().y+130 );
             microWaveProdPos+=80;
+            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWaveProdPos, processSelfitem()->sprite.getPosition().y+130 );
         }
+        microWaveProducts.push_back(copyItem);
+        std::cout << microWaveProducts.size() << std::endl;
         selItem = nullptr;
+        selfEquipment = nullptr;
+    }
+    else if(processSelfitem() == &juiceMachine && coffeeJuiceProducts.size() < 1 && copyItem.type == 0 )
+    {
+        if (coffeeJuiceProducts.empty())
+        {
+            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
+        }
+        coffeeJuiceProducts.push_back(copyItem);
+        std::cout << coffeeJuiceProducts.size() << std::endl;
+        selItem = nullptr;
+        selfEquipment = nullptr;
     }
     else
     {
         isReturnAnimation = true;
         returnAnimation();
     }
+}
+
+void Game::isPacket()
+{
+    if(processPacket() == &packet)
+    {
+        if(packet.items.size() < 5 )
+        {
+            if (packet.items.empty())
+            {
+                copyItem.sprite.setScale(0.2, 0.2);
+                copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
+            }
+            else
+            {
+                packetProdPos +=30;
+                copyItem.sprite.setScale(0.2, 0.2);
+                copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
+            }
+            packet.items.push_back(copyItem);
+            std::cout << packet.items.size() << std::endl;
+            selItem = nullptr;
+        }
+    }
+    else
+    {
+        isReturnAnimation = true;
+        returnAnimation();
+    }
+
 }
 
 void Game::returnAnimation()
@@ -264,22 +342,27 @@ void Game::initObjects() {
     hamburger.texture.loadFromFile(getPath() + "/png/hamburger.png");
     hamburger.price = 1;
     hamburger.cookingTime = 30;
+    hamburger.type = 1;
 
     cheseburger.texture.loadFromFile(getPath() + "/png/cheseburger.png");
     cheseburger.price = 1.2;
     cheseburger.cookingTime = 40;
+    cheseburger.type = 1;
 
     bigmak.texture.loadFromFile(getPath() + "/png/bigmak.png");
     bigmak.price = 3;
     bigmak.cookingTime = 60;
+    bigmak.type = 1;
 
     villagePotato.texture.loadFromFile(getPath() + "/png/villagepotato.png");
     villagePotato.price = 2;
     villagePotato.cookingTime = 60;
+    villagePotato.type = 1;
 
     potato.texture.loadFromFile(getPath() + "/png/freePotato.png");
     potato.price = 1.3;
     potato.cookingTime = 60;
+    potato.type = 1;
 
     souse.texture.loadFromFile(getPath() + "/png/chesesouse.png");
     souse.price = 0.5;
@@ -288,10 +371,12 @@ void Game::initObjects() {
     juice.texture.loadFromFile(getPath() + "/png/orangeJuice.png");
     juice.price = 1.5;
     juice.cookingTime = 10;
+    juice.type = 0;
 
     coffee.texture.loadFromFile(getPath() + "/png/coffee.png");
     coffee.price = 1.4;
     coffee.cookingTime = 20;
+    coffee.type = 0;
 
     hamburger.sprite.setTexture(hamburger.texture);
     cheseburger.sprite.setTexture(cheseburger.texture);
@@ -315,7 +400,6 @@ void Game::initObjects() {
         i->text.setCharacterSize(16);
     }
 
-
     //setting equipment on screen
     microWave.texture.loadFromFile(getPath() + "/png/microwave.png");
     microWave.sprite.setTexture(microWave.texture);
@@ -324,7 +408,6 @@ void Game::initObjects() {
     microWave.text.setFont(font);
     microWave.text.setPosition(microWave.sprite.getPosition().x+180, microWave.sprite.getPosition().y+9);
     microWave.text.setString("off");
-
 
     cash.texture.loadFromFile(getPath() + "/png/cash.png");
     cash.sprite.setTexture(cash.texture);
@@ -337,7 +420,15 @@ void Game::initObjects() {
     juiceMachine.sprite.setScale(0.3f,0.3f);
     juiceMachine.sprite.setPosition(X-juiceMachine.sprite.getGlobalBounds().width *2 +25 ,Y - juiceMachine.sprite.getGlobalBounds().height - 30);
     juiceMachine.texture.setSmooth(true);
+    juiceMachine.text.setFont(font);
+    juiceMachine.text.setPosition(juiceMachine.sprite.getPosition().x+75, juiceMachine.sprite.getPosition().y);
+    juiceMachine.text.setString("off");
 
+    packet.texture.loadFromFile(getPath() + "/png/paket.png");
+    packet.sprite.setTexture(packet.texture);
+    packet.sprite.setScale(0.5f,0.5f);
+    packet.sprite.setPosition(670, 470);
+    packet.texture.setSmooth(true);
 }
 
 void Game::updateMousePosition()
@@ -354,13 +445,35 @@ void Game::renderItems() {
     window->draw(copyItem.sprite);
 }
 
+void Game::renderCookingItems() {
+    if(microWaveProducts.size() > 0)
+    {
+        for(auto &i : microWaveProducts)
+        {
+            window->draw(i.sprite);
+            window->draw(i.text);
+        }
+    }
+    if(coffeeJuiceProducts.size() > 0)
+    {
+        for(auto &i : coffeeJuiceProducts)
+        {
+            window->draw(i.sprite);
+            window->draw(i.text);
+        }
+    }
+}
+
+
 void Game::renderEquipment() {
     window->draw(cafeBackground.sprite);
     window->draw(backGround.sprite);
     window->draw(microWave.sprite);
     window->draw(microWave.text);
     window->draw(juiceMachine.sprite);
+    window->draw(juiceMachine.text);
     window->draw(cash.sprite);
+    window->draw(packet.sprite);
 }
 
 Item* Game::checkMouseOnItem()
@@ -372,7 +485,26 @@ Item* Game::checkMouseOnItem()
             return i;
         }
     }
+    for (auto& i : microWaveProducts)
+    {
+        if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            return &i;
+        }
+    }
+    for (auto& i : coffeeJuiceProducts)
+    {
+        if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            return &i;
+        }
+    }
     return nullptr;
+}
+
+Item& Game::checkMouseOnCooking()
+{
+
 }
 
 Equipment* Game::checkMouseOnEquipment()
@@ -443,18 +575,6 @@ void Game::renderClient() {
         }
     }
 }
-
-void Game::renderCookingItems() {
-    if(!microWaveProducts.empty())
-    {
-        for(auto i : microWaveProducts)
-        {
-            window->draw(i.sprite);
-            window->draw(i.text);
-        }
-    }
-}
-
 
 void Game::renderOrder(Client& client)
 {
