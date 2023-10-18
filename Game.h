@@ -38,6 +38,7 @@ struct Item     {
     sf::Sprite sprite;
     sf::Texture texture;
     sf::Text text;
+    bool type;
 };
 
 struct Client   {
@@ -46,6 +47,12 @@ struct Client   {
     int category;
     float patience;
     std::vector<std::string> requests;
+};
+
+struct Packet {
+    sf::Sprite sprite;
+    sf::Texture texture;
+    std::vector<Item> items;
 };
 
 class Game {
@@ -71,11 +78,16 @@ private:
 
     // equipment
     Equipment microWave;
+    Equipment juiceMachine;
+
+
     Equipment stove;
     Equipment fryer;
-    Equipment juiceMachine;
     Equipment bin;
     Equipment cash;
+
+    //Packets
+    Packet packet;
 
     //mouse events
     bool draggin = false;
@@ -85,6 +97,7 @@ private:
     sf::Time clickDelay = sf::milliseconds(150);
 
     Equipment* selfEquipment;
+
     Item* selItem;    // if clicked reference
     Item copyItem;
 
@@ -111,7 +124,9 @@ private:
 
     std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine};
     std::vector<Item> microWaveProducts;
-    int microWaveProdPos;
+    std::vector<Item> coffeeJuiceProducts;
+    int microWaveProdPos = 0;
+    int packetProdPos = 0;
 
 
     // vector of Clients, checks, cash
@@ -151,15 +166,21 @@ public:
 
     void updateEvents();
     void updateOrder();
+    void mouseRemote();
+    void moveItem();
+
     void updateMousePosition();
     void returnAnimation();
 
     void isEquipment();
+    void isPacket();
+
 
     void interpolatePosition();
 
     // take information about item
     Equipment* processSelfitem();
+    Packet* processPacket();
 
     void renderFrame();
     void renderItems();
@@ -171,10 +192,13 @@ public:
     void renderOrder();
 
     Item* checkMouseOnItem();
+    Item& checkMouseOnCooking();
+
     Equipment* checkMouseOnEquipment();
 
     void powerEquipment();
     void cookItems();
+    void cookCoffeeJuice();
 
     // accessors
     const bool running() const;
@@ -189,8 +213,6 @@ public:
     void tellOrder(Client& client );
 
     void renderOrder(Client &client);
-
-
 };
 
 
