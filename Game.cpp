@@ -106,6 +106,7 @@ void Game::moveItem() {
 
 void Game::updateOrder()
 {
+    // main activity function
     if(!isReturnAnimation)
     {
         if(ev.type == sf::Event::MouseButtonPressed && ev.mouseButton.button == sf::Mouse::Left && !draggin && isMouseInputAllowed)
@@ -212,7 +213,7 @@ Equipment* Game::processSelfitem()
     return nullptr;
 }
 
-Packet* Game::processPacket()
+Equipment* Game::processPacket()
 {
     if(packet.sprite.getGlobalBounds().contains(mouseClickPos))
         return &packet;
@@ -273,6 +274,25 @@ void Game::isEquipment()
         selfEquipment = nullptr;
         cookItem = nullptr;
     }
+    else if(processSelfitem() == &microWave && microWaveProducts.size() < 3 && cookItem->type == 1 )
+    {
+        if(microWaveProducts.empty())
+        {
+            cookItem->sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100, processSelfitem()->sprite.getPosition().y+130 );
+        }
+        else
+        {
+            microWave.ProdPos+=80;
+            cookItem->sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWave.ProdPos, processSelfitem()->sprite.getPosition().y+130 );
+        }
+        microWaveProducts.push_back(*cookItem);
+        std::cout << microWaveProducts.size() << std::endl;
+        selItem = nullptr;
+        selfEquipment = nullptr;
+        cookItem = nullptr;
+    }
+
+
     else if(processSelfitem() == &juiceMachine && coffeeJuiceProducts.size() < 1 && copyItem.type == 0 )
     {
         if (coffeeJuiceProducts.empty())
@@ -285,6 +305,7 @@ void Game::isEquipment()
         selfEquipment = nullptr;
         cookItem = nullptr;
     }
+
     else
     {
         isReturnAnimation = true;
@@ -297,7 +318,7 @@ void Game::deleteItem(Item *cookItem)
     for (auto it = microWaveProducts.begin(); it != microWaveProducts.end(); ++it) {
         if (&(*it) == cookItem) {
             Item copy(*cookItem);
-            packet.items.push_back(copy);
+            packetVec.push_back(copy);
             if(microWave.ProdPos >0)
                 microWave.ProdPos -=80;
             microWaveProducts.erase(it);
@@ -307,33 +328,53 @@ void Game::deleteItem(Item *cookItem)
     for (auto it = coffeeJuiceProducts.begin(); it != coffeeJuiceProducts.end(); ++it) {
         if (&(*it) == cookItem) {
             Item copy(*cookItem);
-            packet.items.push_back(copy);
+            packetVec.push_back(copy);
             coffeeJuiceProducts.erase(it);
             break;
         }
     }
+    for (auto it = packetVec.begin(); it != packetVec.end(); ++it) {
+        if (&(*it) == cookItem) {
+            Item copy(*cookItem);
+            packetVec.push_back(copy);
+            coffeeJuiceProducts.erase(it);
+            break;
+        }
+    }
+
+}
+
+bool Game::inPacket(Item* cookItem)
+{
+    for(auto it = packetVec.begin(); it != packetVec.end(); ++it)
+    {
+        if (&(*it) == cookItem) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Game::isPacket()
 {
-    if(processPacket() == &packet && packet.items.size() < 5  )
+    if(processPacket() == &packet && packetVec.size() < 5 && !inPacket(cookItem) )
     {
-        if(packet.items.size() < 5 )
+        if(packetVec.size() < 5 )
         {
-            if (packet.items.empty())
+            if (packetVec.empty())
             {
                 cookItem->sprite.setScale(0.2, 0.2);
-                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95, processPacket()->sprite.getPosition().y+205 );
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40, processPacket()->sprite.getPosition().y+205 );
                 deleteItem(cookItem);
             }
             else
             {
                 packet.ProdPos +=30;
                 cookItem->sprite.setScale(0.2, 0.2);
-                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95 + packet.ProdPos, processPacket()->sprite.getPosition().y+205 );
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40 + packet.ProdPos, processPacket()->sprite.getPosition().y+205 );
                 deleteItem(cookItem);
             }
-            std::cout << packet.items.size() << std::endl;
+            std::cout << packetVec.size() << std::endl;
             selItem = nullptr;
             selfEquipment = nullptr;
             cookItem = nullptr;
@@ -527,9 +568,9 @@ void Game::renderCookingItems() {
             window->draw(i.text);
         }
     }
-    if(packet.items.size() > 0)
+    if(packetVec.size() > 0)
     {
-        for(auto &i : packet.items)
+        for(auto &i : packetVec)
         {
             window->draw(i.sprite);
             window->draw(i.text);
@@ -549,6 +590,8 @@ void Game::renderEquipment() {
     window->draw(packet.sprite);
 }
 
+
+//check mouse on new item
 Item* Game::checkMouseOnItem()
 {
     for (const auto& i : vecItems)
@@ -561,6 +604,7 @@ Item* Game::checkMouseOnItem()
     return nullptr;
 }
 
+//check mouse on EXISTING item
 Item* Game::checkMouseOnCooking()
 {
     for (auto &i : microWaveProducts)
@@ -577,7 +621,7 @@ Item* Game::checkMouseOnCooking()
             return &i;
         }
     }
-    for (auto &i : packet.items)
+    for (auto &i : packetVec)
     {
         if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
         {
@@ -599,7 +643,7 @@ Equipment* Game::checkMouseOnEquipment()
     return nullptr;
 }
 
-Packet* Game::checkMouseOnPacket()
+Equipment* Game::checkMouseOnPacket()
 {
     if (packet.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
     {
