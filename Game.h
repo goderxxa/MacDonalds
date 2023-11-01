@@ -92,7 +92,7 @@ private:
     Equipment cash;
 
     //Packets
-    Packet packet;
+    Equipment packet;
 
     //mouse events
     bool draggin = false;
@@ -127,7 +127,7 @@ private:
     std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato,
                                    &potato, &souse, &juice, &coffee };
 
-    std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine};
+    std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine, &packet};
     std::vector<Item> microWaveProducts;
     std::vector<Item> coffeeJuiceProducts;
     std::vector<Item> packetVec;
@@ -183,7 +183,7 @@ public:
 
     // take information about item
     Equipment* processSelfitem();
-    Packet* processPacket();
+    Equipment* processPacket();
 
     void renderFrame();
     void renderItems();
@@ -198,12 +198,13 @@ public:
     Item* checkMouseOnCooking();
 
     Equipment* checkMouseOnEquipment();
-    Packet* checkMouseOnPacket();
+    Equipment* checkMouseOnPacket();
 
     void powerEquipment();
     void cookItems();
     void cookCoffeeJuice();
     void deleteItem(Item* cookItem);
+    bool inPacket(Item* cookItem);
 
     // accessors
     const bool running() const;
