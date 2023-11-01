@@ -30,6 +30,8 @@ struct Equipment    {
     sf::Sprite sprite;
     sf::Texture texture;
     sf::Text text;
+    int ProdPos = 0;
+
 };
 
 struct Item     {
@@ -39,6 +41,9 @@ struct Item     {
     sf::Texture texture;
     sf::Text text;
     bool type;
+    Item () {}
+    Item (const Item* other) : price(other->price), cookingTime(other->cookingTime),
+        sprite(other->sprite), texture(other->texture), text(other->text), type(other->type) {}
 };
 
 struct Client   {
@@ -53,6 +58,7 @@ struct Packet {
     sf::Sprite sprite;
     sf::Texture texture;
     std::vector<Item> items;
+    int ProdPos = 0;
 };
 
 class Game {
@@ -80,7 +86,6 @@ private:
     Equipment microWave;
     Equipment juiceMachine;
 
-
     Equipment stove;
     Equipment fryer;
     Equipment bin;
@@ -91,7 +96,6 @@ private:
 
     //mouse events
     bool draggin = false;
-    bool itemTaken = false;
     bool isMouseInputAllowed = true;
     sf::Clock clickClock;
     sf::Time clickDelay = sf::milliseconds(150);
@@ -127,9 +131,6 @@ private:
     std::vector<Item> microWaveProducts;
     std::vector<Item> coffeeJuiceProducts;
     std::vector<Item> packetVec;
-    int microWaveProdPos = 0;
-    int packetProdPos = 0;
-
 
     // vector of Clients, checks, cash
     std::vector<Client> clients;
@@ -140,7 +141,6 @@ private:
 
     //active objects position
     sf::Vector2f originalObjPos;
-    sf::Vector2f origanalOriginPos;
 
     // text for mouse pos display
     sf::Text mouseText ;
