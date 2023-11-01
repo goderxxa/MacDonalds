@@ -264,8 +264,8 @@ void Game::isEquipment()
         }
         else
         {
-            microWaveProdPos+=80;
-            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWaveProdPos, processSelfitem()->sprite.getPosition().y+130 );
+            microWave.ProdPos+=80;
+            copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWave.ProdPos, processSelfitem()->sprite.getPosition().y+130 );
         }
         microWaveProducts.push_back(copyItem);
         std::cout << microWaveProducts.size() << std::endl;
@@ -292,19 +292,23 @@ void Game::isEquipment()
     }
 }
 
-void Game::deleteItem(Item* cookItem)
+void Game::deleteItem(Item *cookItem)
 {
     for (auto it = microWaveProducts.begin(); it != microWaveProducts.end(); ++it) {
-        if (&(*it) == selItem) {
-            packetVec.push_back(*selItem);
-            microWaveProducts.erase(it); // Удаляем элемент из исходного вектора
+        if (&(*it) == cookItem) {
+            Item copy(*cookItem);
+            packet.items.push_back(copy);
+            if(microWave.ProdPos >0)
+                microWave.ProdPos -=80;
+            microWaveProducts.erase(it);
             break;
         }
     }
     for (auto it = coffeeJuiceProducts.begin(); it != coffeeJuiceProducts.end(); ++it) {
-        if (&(*it) == selItem) {
-            packetVec.push_back(*selItem);
-            coffeeJuiceProducts.erase(it); // Удаляем элемент из исходного вектора
+        if (&(*it) == cookItem) {
+            Item copy(*cookItem);
+            packet.items.push_back(copy);
+            coffeeJuiceProducts.erase(it);
             break;
         }
     }
@@ -312,7 +316,7 @@ void Game::deleteItem(Item* cookItem)
 
 void Game::isPacket()
 {
-    if(processPacket() == &packet)
+    if(processPacket() == &packet && packet.items.size() < 5  )
     {
         if(packet.items.size() < 5 )
         {
@@ -324,12 +328,11 @@ void Game::isPacket()
             }
             else
             {
-                packetProdPos +=30;
+                packet.ProdPos +=30;
                 cookItem->sprite.setScale(0.2, 0.2);
-                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95, processPacket()->sprite.getPosition().y+205 );
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95 + packet.ProdPos, processPacket()->sprite.getPosition().y+205 );
                 deleteItem(cookItem);
             }
-            packet.items.push_back(*cookItem);
             std::cout << packet.items.size() << std::endl;
             selItem = nullptr;
             selfEquipment = nullptr;
@@ -524,6 +527,14 @@ void Game::renderCookingItems() {
             window->draw(i.text);
         }
     }
+    if(packet.items.size() > 0)
+    {
+        for(auto &i : packet.items)
+        {
+            window->draw(i.sprite);
+            window->draw(i.text);
+        }
+    }
 }
 
 
@@ -560,6 +571,13 @@ Item* Game::checkMouseOnCooking()
         }
     }
     for (auto &i : coffeeJuiceProducts)
+    {
+        if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            return &i;
+        }
+    }
+    for (auto &i : packet.items)
     {
         if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
         {
