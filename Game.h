@@ -99,6 +99,7 @@ private:
     Equipment* selfEquipment;
 
     Item* selItem;    // if clicked reference
+    Item* cookItem;
     Item copyItem;
 
     //other events buttons
@@ -125,6 +126,7 @@ private:
     std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine};
     std::vector<Item> microWaveProducts;
     std::vector<Item> coffeeJuiceProducts;
+    std::vector<Item> packetVec;
     int microWaveProdPos = 0;
     int packetProdPos = 0;
 
@@ -171,6 +173,7 @@ public:
 
     void updateMousePosition();
     void returnAnimation();
+    void returnAnimation2();
 
     void isEquipment();
     void isPacket();
@@ -192,13 +195,15 @@ public:
     void renderOrder();
 
     Item* checkMouseOnItem();
-    Item& checkMouseOnCooking();
+    Item* checkMouseOnCooking();
 
     Equipment* checkMouseOnEquipment();
+    Packet* checkMouseOnPacket();
 
     void powerEquipment();
     void cookItems();
     void cookCoffeeJuice();
+    void deleteItem(Item* cookItem);
 
     // accessors
     const bool running() const;
