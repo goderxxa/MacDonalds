@@ -114,6 +114,9 @@ void Game::updateOrder()
             clickClock.restart();
 
             selItem = checkMouseOnItem();
+            if(selItem == nullptr)
+                cookItem = checkMouseOnCooking();
+
             selfEquipment = checkMouseOnEquipment();
             powerEquipment();
 
@@ -122,6 +125,12 @@ void Game::updateOrder()
                 originalObjPos = copyItem.sprite.getPosition();
                 std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
                 copyItem.sprite.setScale(0.4,0.4);          //change size of dragging item
+                draggin = true;
+            }
+            else if(cookItem != nullptr)
+            {
+                originalObjPos = cookItem->sprite.getPosition();
+                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
                 draggin = true;
             }
         }
@@ -133,10 +142,12 @@ void Game::updateOrder()
                 isMouseInputAllowed = true; // Разрешаем обработку следующего клика
             }
         }
-
         if(draggin )
         {
-            copyItem.sprite.setPosition(sf::Vector2f (this->mousePosition));
+            if(selItem!= nullptr)
+                copyItem.sprite.setPosition(sf::Vector2f (this->mousePosition));
+            else if(cookItem!= nullptr)
+                cookItem->sprite.setPosition(sf::Vector2f (this->mousePosition));
         }
         if(ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Right)
         {
@@ -147,15 +158,29 @@ void Game::updateOrder()
                 mouseClickPos = copyItem.sprite.getPosition();
                 returnAnimationClock.restart();
             }
+            else if (cookItem != nullptr)
+            {
+                draggin = false;
+                mouseClickPos = cookItem->sprite.getPosition();
+                returnAnimationClock.restart();
+            }
         }
     }
-    if(selItem!= nullptr )
+    if(selItem!= nullptr)
     {
         if(!draggin)
         {
             isEquipment();
         }
     }
+    else if(cookItem!= nullptr)
+    {
+        if(!draggin)
+        {
+            isPacket();
+        }
+    }
+
     if(microWave.text.getString()=="on" )
     {
         cookItems();
@@ -246,6 +271,7 @@ void Game::isEquipment()
         std::cout << microWaveProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
+        cookItem = nullptr;
     }
     else if(processSelfitem() == &juiceMachine && coffeeJuiceProducts.size() < 1 && copyItem.type == 0 )
     {
@@ -257,11 +283,30 @@ void Game::isEquipment()
         std::cout << coffeeJuiceProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
+        cookItem = nullptr;
     }
     else
     {
         isReturnAnimation = true;
         returnAnimation();
+    }
+}
+
+void Game::deleteItem(Item* cookItem)
+{
+    for (auto it = microWaveProducts.begin(); it != microWaveProducts.end(); ++it) {
+        if (&(*it) == selItem) {
+            packetVec.push_back(*selItem);
+            microWaveProducts.erase(it); // Удаляем элемент из исходного вектора
+            break;
+        }
+    }
+    for (auto it = coffeeJuiceProducts.begin(); it != coffeeJuiceProducts.end(); ++it) {
+        if (&(*it) == selItem) {
+            packetVec.push_back(*selItem);
+            coffeeJuiceProducts.erase(it); // Удаляем элемент из исходного вектора
+            break;
+        }
     }
 }
 
@@ -273,26 +318,29 @@ void Game::isPacket()
         {
             if (packet.items.empty())
             {
-                copyItem.sprite.setScale(0.2, 0.2);
-                copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
+                cookItem->sprite.setScale(0.2, 0.2);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95, processPacket()->sprite.getPosition().y+205 );
+                deleteItem(cookItem);
             }
             else
             {
                 packetProdPos +=30;
-                copyItem.sprite.setScale(0.2, 0.2);
-                copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
+                cookItem->sprite.setScale(0.2, 0.2);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 95, processPacket()->sprite.getPosition().y+205 );
+                deleteItem(cookItem);
             }
-            packet.items.push_back(copyItem);
+            packet.items.push_back(*cookItem);
             std::cout << packet.items.size() << std::endl;
             selItem = nullptr;
+            selfEquipment = nullptr;
+            cookItem = nullptr;
         }
     }
     else
     {
         isReturnAnimation = true;
-        returnAnimation();
+        returnAnimation2();
     }
-
 }
 
 void Game::returnAnimation()
@@ -307,8 +355,22 @@ void Game::returnAnimation()
     }
     sf::Vector2f interpolatedPosition = copyItem.sprite.getPosition() + (originalObjPos - copyItem.sprite.getPosition()) * progress;
     copyItem.sprite.setPosition(interpolatedPosition);
-
 }
+
+void Game::returnAnimation2()
+{
+    cookItem->sprite.setColor(sf::Color(255,255,255,100));
+    float progress = returnAnimationClock.getElapsedTime().asSeconds() / returnAnimationDuration.asSeconds();
+    if(progress > 0.3)
+    {
+        progress = 1.0;
+        isReturnAnimation = false;
+        cookItem->sprite.setColor(sf::Color(255,255,255,255));
+    }
+    sf::Vector2f interpolatedPosition = cookItem->sprite.getPosition() + (originalObjPos - cookItem->sprite.getPosition()) * progress;
+    cookItem->sprite.setPosition(interpolatedPosition);
+}
+
 
 void Game::renderFrame() {
     window->clear();
@@ -485,14 +547,19 @@ Item* Game::checkMouseOnItem()
             return i;
         }
     }
-    for (auto& i : microWaveProducts)
+    return nullptr;
+}
+
+Item* Game::checkMouseOnCooking()
+{
+    for (auto &i : microWaveProducts)
     {
         if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
         {
             return &i;
         }
     }
-    for (auto& i : coffeeJuiceProducts)
+    for (auto &i : coffeeJuiceProducts)
     {
         if (i.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
         {
@@ -500,11 +567,6 @@ Item* Game::checkMouseOnItem()
         }
     }
     return nullptr;
-}
-
-Item& Game::checkMouseOnCooking()
-{
-
 }
 
 Equipment* Game::checkMouseOnEquipment()
@@ -519,22 +581,12 @@ Equipment* Game::checkMouseOnEquipment()
     return nullptr;
 }
 
-
-sf::Vector2f Game::getLocalClickPosition(const sf::Sprite& sprite, const sf::Vector2i& mousePosition)
+Packet* Game::checkMouseOnPacket()
 {
-    // Получаем позицию мыши в локальных координатах объекта
-    sf::Vector2f localMousePos = sprite.getInverseTransform().transformPoint(static_cast<sf::Vector2f>(mousePosition));
-
-    // Получение локальных границ спрайта
-    sf::FloatRect bounds = sprite.getLocalBounds();
-
-    // Проверка, щелкнули ли на объекте
-    if (bounds.contains(localMousePos))
+    if (packet.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
     {
-        return localMousePos;
+        return &packet;
     }
-    // Если щелчок мыши не на объекте, возвращаем пустой вектор
-    return sf::Vector2f(-0.0f, -0.0f);
 }
 
 void Game::genNewClient()
