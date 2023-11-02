@@ -112,7 +112,6 @@ void Game::updateOrder()
              * else working with reference object
              */
 
-
             selItem = checkMouseOnItem();
             if(selItem == nullptr)
                 cookItem = checkMouseOnCooking();
@@ -124,14 +123,14 @@ void Game::updateOrder()
             if(selItem!= nullptr){
                 copyItem = *selItem;
                 originalObjPos = copyItem.sprite.getPosition();
-                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
+//                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
                 copyItem.sprite.setScale(0.4,0.4);          //change size of dragging item
                 draggin = true;
             }
             else if(cookItem != nullptr)
             {
                 originalObjPos = cookItem->sprite.getPosition();
-                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
+//                std::cout << originalObjPos.x << " " << originalObjPos.y << std::endl;
                 draggin = true;
             }
         }
@@ -212,12 +211,18 @@ void Game::powerEquipment()
     {
         if(selfEquipment->text.getGlobalBounds().contains(sf::Vector2f (mousePosition)))
         {
-            if(selfEquipment->text.getString() == "off")
+            if (selfEquipment->text.getString() == "off")
+            {
                 selfEquipment->text.setString("on");
+            }
             else if (selfEquipment->text.getString() == "on")
+            {
                 selfEquipment->text.setString("off");
-            else if(selfEquipment->text.getString() == "erase")
-               binVec.empty();
+            }
+            else if (selfEquipment->text.getString() == "erase")
+            {
+                binVec.clear();
+            }
         }
     }
 }
@@ -291,7 +296,7 @@ void Game::isEquipment()
         }
         microWaveProducts.push_back(copyItem);
         copyItem.sprite.scale(0,0);
-        std::cout << microWaveProducts.size() << std::endl;
+        std::cout << "Microwave size: " <<  microWaveProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
         cookItem = nullptr;
@@ -304,7 +309,7 @@ void Game::isEquipment()
         }
         coffeeJuiceProducts.push_back(copyItem);
         copyItem.sprite.scale(0,0);
-        std::cout << coffeeJuiceProducts.size() << std::endl;
+        std::cout << "Coffee machine size: " <<  coffeeJuiceProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
         cookItem = nullptr;
@@ -379,7 +384,7 @@ void Game::isPacket()
                 cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40 + packet.ProdPos, processPacket()->sprite.getPosition().y+205 );
                 deleteItem(cookItem);
             }
-            std::cout << packetVec.size() << std::endl;
+            std::cout << "Packet size: " <<  packetVec.size() << std::endl;
             selItem = nullptr;
             selfEquipment = nullptr;
             cookItem = nullptr;
@@ -402,7 +407,7 @@ void Game::isPacket()
                 cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 30 + bin.ProdPos, processPacket()->sprite.getPosition().y+135 );
                 deleteItem(cookItem);
             }
-            std::cout << binVec.size() << std::endl;
+            std::cout << "Bin size: " <<  binVec.size() << std::endl;
             selItem = nullptr;
             selfEquipment = nullptr;
             cookItem = nullptr;
@@ -414,8 +419,6 @@ void Game::isPacket()
         returnAnimation2();
     }
 }
-
-
 
 void Game::returnAnimation()
 {
@@ -444,7 +447,6 @@ void Game::returnAnimation2()
     sf::Vector2f interpolatedPosition = cookItem->sprite.getPosition() + (originalObjPos - cookItem->sprite.getPosition()) * progress;
     cookItem->sprite.setPosition(interpolatedPosition);
 }
-
 
 void Game::renderFrame() {
     window->clear();
@@ -572,10 +574,19 @@ void Game::initObjects() {
     bin.sprite.setPosition(cash.sprite.getPosition().x + 200, cash.sprite.getPosition().y+40);
     bin.texture.setSmooth(true);
     bin.text.setFont(font);
-    bin.text.setPosition(bin.sprite.getPosition().x , cash.sprite.getPosition().y);
+    bin.text.setFillColor(sf::Color::Black);
+    bin.text.setPosition(bin.sprite.getPosition().x +2 , bin.sprite.getPosition().y + 70 );
     bin.text.setString("erase");
 
 }
+
+//void Game::updateEquipmentPos(std::vector<Item>& vecItems, Equipment& equipment)
+//{
+//    for(auto &i : vecItems)
+//    {
+//        i.sprite.setPosition(equipment.)
+//    }
+//}
 
 void Game::updateMousePosition()
 {
