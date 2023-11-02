@@ -43,7 +43,7 @@ struct Item     {
     bool type;
     Item () {}
     Item (const Item* other) : price(other->price), cookingTime(other->cookingTime),
-        sprite(other->sprite), texture(other->texture), text(other->text), type(other->type) {}
+                               sprite(other->sprite), texture(other->texture), text(other->text), type(other->type) {}
 };
 
 struct Client   {
@@ -85,11 +85,13 @@ private:
     // equipment
     Equipment microWave;
     Equipment juiceMachine;
+    Equipment cash;
 
     Equipment stove;
     Equipment fryer;
+
+    //bin
     Equipment bin;
-    Equipment cash;
 
     //Packets
     Equipment packet;
@@ -127,10 +129,11 @@ private:
     std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato,
                                    &potato, &souse, &juice, &coffee };
 
-    std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine, &packet};
+    std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine, &packet, &bin};
     std::vector<Item> microWaveProducts;
     std::vector<Item> coffeeJuiceProducts;
     std::vector<Item> packetVec;
+    std::vector<Item> binVec;
 
     // vector of Clients, checks, cash
     std::vector<Client> clients;
@@ -177,6 +180,7 @@ public:
 
     void isEquipment();
     void isPacket();
+    void isBin();
 
 
     void interpolatePosition();
