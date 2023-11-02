@@ -107,10 +107,17 @@ void Game::updateOrder()
             isMouseInputAllowed = false; // Блокируем дополнительные клики
             clickClock.restart();
 
+            /* check mouse position.
+             * if mouse on selItem make copy of obj.
+             * else working with reference object
+             */
+
+
             selItem = checkMouseOnItem();
             if(selItem == nullptr)
                 cookItem = checkMouseOnCooking();
 
+            // variable to know that equipment is uses
             selfEquipment = checkMouseOnEquipment();
             powerEquipment();
 
@@ -145,6 +152,7 @@ void Game::updateOrder()
         }
         if(ev.type == sf::Event::MouseButtonReleased && ev.mouseButton.button == sf::Mouse::Right)
         {
+            // set mouse clicking position
             if(selItem!= nullptr )
             {
                 draggin = false;
@@ -160,6 +168,7 @@ void Game::updateOrder()
             }
         }
     }
+    //we can put copy of item only to equipment(
     if(selItem!= nullptr)
     {
         if(!draggin)
@@ -174,7 +183,6 @@ void Game::updateOrder()
             isPacket();
         }
     }
-
     if(microWave.text.getString()=="on" )
     {
         cookItems();
@@ -184,21 +192,39 @@ void Game::updateOrder()
         cookCoffeeJuice();
     }
 }
+
+Equipment* Game::checkMouseOnEquipment()
+{
+    for (auto& i : vecEquipment)
+    {
+        if (i->sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
+        {
+            return i;
+        }
+    }
+    return nullptr;
+}
+
+//power equipment and erase bin
 void Game::powerEquipment()
 {
     if(selfEquipment!= nullptr)
     {
         if(selfEquipment->text.getGlobalBounds().contains(sf::Vector2f (mousePosition)))
+        {
             if(selfEquipment->text.getString() == "off")
                 selfEquipment->text.setString("on");
-            else
+            else if (selfEquipment->text.getString() == "on")
                 selfEquipment->text.setString("off");
+            else if(selfEquipment->text.getString() == "erase")
+               binVec.empty();
+        }
     }
 }
 
 Equipment* Game::processSelfitem()
 {
-    for(auto equipment : vecEquipment)
+    for(auto& equipment : vecEquipment)
     {
         if(equipment->sprite.getGlobalBounds().contains(mouseClickPos) )
             return equipment;
@@ -314,6 +340,8 @@ void Game::deleteItem(Item *cookItem)
         if (&(*it) == cookItem) {
             Item copy(*cookItem);
             binVec.push_back(copy);
+            if(packet.ProdPos == 200 )
+                packet.ProdPos = 0;
             packetVec.erase(it);
             break;
         }
@@ -357,21 +385,21 @@ void Game::isPacket()
             cookItem = nullptr;
         }
     }
-    else if(processPacket() == &bin && binVec.size() < 10 )
+    else if(processPacket() == &bin && binVec.size() < 10 && inPacket(cookItem) )
     {
         if(binVec.size() < 10 )
         {
             if (binVec.empty())
             {
-                cookItem->sprite.setScale(0.2, 0.2);
-                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40, processPacket()->sprite.getPosition().y+205 );
+                cookItem->sprite.setScale(0.1, 0.1);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 30, processPacket()->sprite.getPosition().y + 135);
                 deleteItem(cookItem);
             }
             else
             {
-                bin.ProdPos +=30;
-                cookItem->sprite.setScale(0.2, 0.2);
-                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40 + bin.ProdPos, processPacket()->sprite.getPosition().y+205 );
+                bin.ProdPos +=15;
+                cookItem->sprite.setScale(0.1, 0.1);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 30 + bin.ProdPos, processPacket()->sprite.getPosition().y+135 );
                 deleteItem(cookItem);
             }
             std::cout << binVec.size() << std::endl;
@@ -380,9 +408,6 @@ void Game::isPacket()
             cookItem = nullptr;
         }
     }
-
-
-
     else
     {
         isReturnAnimation = true;
@@ -546,6 +571,10 @@ void Game::initObjects() {
     bin.sprite.setScale(0.3f,0.3f);
     bin.sprite.setPosition(cash.sprite.getPosition().x + 200, cash.sprite.getPosition().y+40);
     bin.texture.setSmooth(true);
+    bin.text.setFont(font);
+    bin.text.setPosition(bin.sprite.getPosition().x , cash.sprite.getPosition().y);
+    bin.text.setString("erase");
+
 }
 
 void Game::updateMousePosition()
@@ -587,21 +616,28 @@ void Game::renderCookingItems() {
             window->draw(i.text);
         }
     }
+    if(binVec.size() > 0)
+    {
+        for(auto &i : binVec)
+        {
+            window->draw(i.sprite);
+            window->draw(i.text);
+        }
+    }
 }
-
 
 void Game::renderEquipment() {
     window->draw(cafeBackground.sprite);
     window->draw(backGround.sprite);
     window->draw(microWave.sprite);
     window->draw(microWave.text);
-    window->draw(bin.sprite);
     window->draw(juiceMachine.sprite);
     window->draw(juiceMachine.text);
     window->draw(cash.sprite);
     window->draw(packet.sprite);
+    window->draw(bin.sprite);
+    window->draw(bin.text);
 }
-
 
 //check mouse on new item
 Item* Game::checkMouseOnItem()
@@ -641,26 +677,6 @@ Item* Game::checkMouseOnCooking()
         }
     }
     return nullptr;
-}
-
-Equipment* Game::checkMouseOnEquipment()
-{
-    for (const auto& i : vecEquipment)
-    {
-        if (i->sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
-        {
-            return i;
-        }
-    }
-    return nullptr;
-}
-
-Equipment* Game::checkMouseOnPacket()
-{
-    if (packet.sprite.getGlobalBounds().contains(sf::Vector2f(mousePosition)))
-    {
-        return &packet;
-    }
 }
 
 void Game::genNewClient()
