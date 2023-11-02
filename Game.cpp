@@ -97,13 +97,6 @@ void Game::updateEvents() {
     processEvents();
 }
 
-
-void Game::moveItem() {
-    copyItem = *selItem;
-    copyItem.sprite.setPosition(mousePosition.x,mousePosition.y);
-
-}
-
 void Game::updateOrder()
 {
     // main activity function
@@ -217,6 +210,8 @@ Equipment* Game::processPacket()
 {
     if(packet.sprite.getGlobalBounds().contains(mouseClickPos))
         return &packet;
+    if(bin.sprite.getGlobalBounds().contains(mouseClickPos))
+        return &bin;
     return nullptr;
 }
 
@@ -269,30 +264,12 @@ void Game::isEquipment()
             copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWave.ProdPos, processSelfitem()->sprite.getPosition().y+130 );
         }
         microWaveProducts.push_back(copyItem);
+        copyItem.sprite.scale(0,0);
         std::cout << microWaveProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
         cookItem = nullptr;
     }
-    else if(processSelfitem() == &microWave && microWaveProducts.size() < 3 && cookItem->type == 1 )
-    {
-        if(microWaveProducts.empty())
-        {
-            cookItem->sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100, processSelfitem()->sprite.getPosition().y+130 );
-        }
-        else
-        {
-            microWave.ProdPos+=80;
-            cookItem->sprite.setPosition(processSelfitem()->sprite.getPosition().x + 100 + microWave.ProdPos, processSelfitem()->sprite.getPosition().y+130 );
-        }
-        microWaveProducts.push_back(*cookItem);
-        std::cout << microWaveProducts.size() << std::endl;
-        selItem = nullptr;
-        selfEquipment = nullptr;
-        cookItem = nullptr;
-    }
-
-
     else if(processSelfitem() == &juiceMachine && coffeeJuiceProducts.size() < 1 && copyItem.type == 0 )
     {
         if (coffeeJuiceProducts.empty())
@@ -300,12 +277,12 @@ void Game::isEquipment()
             copyItem.sprite.setPosition(processSelfitem()->sprite.getPosition().x + 95, processSelfitem()->sprite.getPosition().y+205 );
         }
         coffeeJuiceProducts.push_back(copyItem);
+        copyItem.sprite.scale(0,0);
         std::cout << coffeeJuiceProducts.size() << std::endl;
         selItem = nullptr;
         selfEquipment = nullptr;
         cookItem = nullptr;
     }
-
     else
     {
         isReturnAnimation = true;
@@ -336,8 +313,8 @@ void Game::deleteItem(Item *cookItem)
     for (auto it = packetVec.begin(); it != packetVec.end(); ++it) {
         if (&(*it) == cookItem) {
             Item copy(*cookItem);
-            packetVec.push_back(copy);
-            coffeeJuiceProducts.erase(it);
+            binVec.push_back(copy);
+            packetVec.erase(it);
             break;
         }
     }
@@ -380,12 +357,40 @@ void Game::isPacket()
             cookItem = nullptr;
         }
     }
+    else if(processPacket() == &bin && binVec.size() < 10 )
+    {
+        if(binVec.size() < 10 )
+        {
+            if (binVec.empty())
+            {
+                cookItem->sprite.setScale(0.2, 0.2);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40, processPacket()->sprite.getPosition().y+205 );
+                deleteItem(cookItem);
+            }
+            else
+            {
+                bin.ProdPos +=30;
+                cookItem->sprite.setScale(0.2, 0.2);
+                cookItem->sprite.setPosition(processPacket()->sprite.getPosition().x + 40 + bin.ProdPos, processPacket()->sprite.getPosition().y+205 );
+                deleteItem(cookItem);
+            }
+            std::cout << binVec.size() << std::endl;
+            selItem = nullptr;
+            selfEquipment = nullptr;
+            cookItem = nullptr;
+        }
+    }
+
+
+
     else
     {
         isReturnAnimation = true;
         returnAnimation2();
     }
 }
+
+
 
 void Game::returnAnimation()
 {
@@ -517,7 +522,7 @@ void Game::initObjects() {
 
     cash.texture.loadFromFile(getPath() + "/png/cash.png");
     cash.sprite.setTexture(cash.texture);
-    cash.sprite.setScale(0.7f,0.7f);
+    cash.sprite.setScale(0.5f,0.5f);
     cash.sprite.setPosition(10,Y- cash.sprite.getGlobalBounds().height -10);
     cash.texture.setSmooth(true);
 
@@ -535,6 +540,12 @@ void Game::initObjects() {
     packet.sprite.setScale(0.5f,0.5f);
     packet.sprite.setPosition(670, 470);
     packet.texture.setSmooth(true);
+
+    bin.texture.loadFromFile(getPath() + "/png/bin.png");
+    bin.sprite.setTexture(bin.texture);
+    bin.sprite.setScale(0.3f,0.3f);
+    bin.sprite.setPosition(cash.sprite.getPosition().x + 200, cash.sprite.getPosition().y+40);
+    bin.texture.setSmooth(true);
 }
 
 void Game::updateMousePosition()
@@ -584,6 +595,7 @@ void Game::renderEquipment() {
     window->draw(backGround.sprite);
     window->draw(microWave.sprite);
     window->draw(microWave.text);
+    window->draw(bin.sprite);
     window->draw(juiceMachine.sprite);
     window->draw(juiceMachine.text);
     window->draw(cash.sprite);
