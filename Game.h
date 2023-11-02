@@ -85,16 +85,13 @@ private:
     // equipment
     Equipment microWave;
     Equipment juiceMachine;
-    Equipment cash;
-
-    Equipment stove;
-    Equipment fryer;
-
     //bin
     Equipment bin;
-
     //Packets
     Equipment packet;
+    Equipment cash;
+    Equipment stove;
+    Equipment fryer;
 
     //mouse events
     bool draggin = false;
@@ -126,10 +123,10 @@ private:
     Item juice;
     Item coffee;
 
-    std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato,
-                                   &potato, &souse, &juice, &coffee };
+    std::vector<Item*> vecItems = {&hamburger, &cheseburger, &bigmak, &villagePotato, &potato, &souse, &juice, &coffee};
 
     std::vector<Equipment*> vecEquipment = {&microWave, &juiceMachine, &packet, &bin};
+
     std::vector<Item> microWaveProducts;
     std::vector<Item> coffeeJuiceProducts;
     std::vector<Item> packetVec;
@@ -180,8 +177,6 @@ public:
 
     void isEquipment();
     void isPacket();
-    void isBin();
-
 
     void interpolatePosition();
 
@@ -205,6 +200,7 @@ public:
     Equipment* checkMouseOnPacket();
 
     void powerEquipment();
+    void eraseBin();
     void cookItems();
     void cookCoffeeJuice();
     void deleteItem(Item* cookItem);
