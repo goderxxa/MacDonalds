@@ -168,8 +168,7 @@ public:
 
     void updateEvents();
     void updateOrder();
-    void mouseRemote();
-    void moveItem();
+    void updateEquipmentPos(std::vector<Item>& vecItems, Equipment& equipment);
 
     void updateMousePosition();
     void returnAnimation();
