@@ -51,7 +51,7 @@ struct Client   {
     sf::Texture texture;
     int category;
     float patience;
-    std::vector<std::string> requests;
+    std::vector<Item> requests;
 };
 
 struct Packet {
@@ -106,8 +106,8 @@ private:
     Item copyItem;
 
     //other events buttons
-    Button repeatButtonSprite;
-    Button nextButtonSprite;
+    Button repeatButton;
+    Button nextButton;
 
     Button juiceCoffee;
     Button pour;
@@ -168,7 +168,7 @@ public:
 
     void updateEvents();
     void updateOrder();
-    void updateEquipmentPos(std::vector<Item>& vecItems, Equipment& equipment);
+    void updateEquipmentPos(Equipment* selfEqupment);
 
     void updateMousePosition();
     void returnAnimation();
